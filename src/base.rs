@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::rank::TaxRank;
-use crate::taxonomy::Taxonomy;
+use crate::taxonomy::{Taxonomy, Parent};
 use crate::{Result, TaxonomyError};
 
 pub type IntTaxID = usize;
@@ -166,7 +166,7 @@ impl<'s> Taxonomy<'s, IntTaxID, f32> for GeneralTaxonomy {
         }
     }
 
-    fn parent(&self, tax_id: IntTaxID) -> Result<Option<(IntTaxID, f32)>> {
+    fn parent(&self, tax_id: IntTaxID) -> Result<Option<Parent<IntTaxID, f32>>> {
         // O(1) implementation
         if (tax_id as usize >= self.parent_ids.len()) || (tax_id == 0) {
             return Err(TaxonomyError::NoSuchKey {
@@ -177,7 +177,7 @@ impl<'s> Taxonomy<'s, IntTaxID, f32> for GeneralTaxonomy {
         if tax_id == 0 {
             return Ok(None);
         }
-        Ok(Some((
+        Ok(Some(Parent::new(
             self.parent_ids[tax_id as usize] as IntTaxID,
             self.parent_dists[tax_id as usize],
         )))
@@ -236,13 +236,13 @@ impl<'s> Taxonomy<'s, &'s str, f32> for GeneralTaxonomy {
         }
     }
 
-    fn parent(&self, tax_id: &str) -> Result<Option<(&str, f32)>> {
+    fn parent(&self, tax_id: &str) -> Result<Option<Parent<&str, f32>>> {
         // O(1) implementation
         let usize_tax_id = self.to_internal_id(&tax_id)?;
         if usize_tax_id == 0 {
             return Ok(None);
         }
-        Ok(Some((
+        Ok(Some(Parent::new(
             self.from_internal_id(self.parent_ids[usize_tax_id])?,
             self.parent_dists[usize_tax_id],
         )))

@@ -29,7 +29,7 @@ where
                 scores.push((*score).clone());
             }
             match taxonomy.parent(tax_node)? {
-                Some(p) => tax_node = p.0,
+                Some(p) => tax_node = p.tax_id,
                 None => break,
             }
         }
@@ -68,7 +68,7 @@ where
                 scores.push((*score).clone());
             }
             match taxonomy.parent(tax_node)? {
-                Some(p) => tax_node = p.0,
+                Some(p) => tax_node = p.tax_id,
                 None => break,
             }
         }
@@ -101,23 +101,28 @@ where
     // all the leaf nodes?
 }
 
-#[test]
-fn test_maximum_weighted_path() {
-    use crate::taxonomy::test::MockTax;
-    let tax = MockTax;
-    let mut hits: HashMap<u32, u16> = HashMap::new();
-    hits.insert(0, 41);
-    hits.insert(1, 25);
-    hits.insert(131567, 233);
-    hits.insert(2, 512);
-    hits.insert(1224, 33);
-    hits.insert(1236, 275);
-    hits.insert(135622, 59);
-    hits.insert(22, 270);
-    hits.insert(62322, 49);
-    hits.insert(56812, 1);
-    assert_eq!(
-        maximum_weighted_path(&tax, &hits, false).unwrap().0,
-        Some(56812)
-    );
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_maximum_weighted_path() {
+        use crate::taxonomy::test::MockTax;
+        let tax = MockTax;
+        let mut hits: HashMap<u32, u16> = HashMap::new();
+        hits.insert(0, 41);
+        hits.insert(1, 25);
+        hits.insert(131567, 233);
+        hits.insert(2, 512);
+        hits.insert(1224, 33);
+        hits.insert(1236, 275);
+        hits.insert(135622, 59);
+        hits.insert(22, 270);
+        hits.insert(62322, 49);
+        hits.insert(56812, 1);
+        assert_eq!(
+            maximum_weighted_path(&tax, &hits, false).unwrap().0,
+            Some(56812)
+        );
+    }
 }

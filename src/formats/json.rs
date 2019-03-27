@@ -221,7 +221,7 @@ where
         if let Some(parent_id) = tax.parent(tid)? {
             links.push(json!({
                 "source": ix,
-                "target": id_to_idx[&parent_id.0],
+                "target": id_to_idx[&parent_id.tax_id],
             }));
         }
     }

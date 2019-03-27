@@ -103,7 +103,7 @@ where
                 "{}\t|\t{}\t|\t{}\t|\t\t|\t\t|\t\t|\t\t|\t\t|\t\t|\t\t|\t\t|\t\t|\t\t|",
                 &key,
                 tax.parent(key.clone())?
-                    .map(|x| format!("{}", x.0))
+                    .map(|x| format!("{}", x.tax_id))
                     .unwrap_or_else(|| "".to_string()),
                 rank.map(|x| x.to_ncbi_rank()).unwrap_or(""),
             )
@@ -114,11 +114,16 @@ where
     Ok(())
 }
 
-#[test]
-fn test_ncbi_importer() {
+#[cfg(test)]
+mod tests {
+    use super::{load_ncbi};
     use std::io::Cursor;
+    use crate::rank::TaxRank;
+    use crate::taxonomy::{Taxonomy, Parent};
 
-    let nodes = "1\t|\t1\t|\tno rank\t|\t\t|\t8\t|\t0\t|\t1\t|\t0\t|\t0\t|\t0\t|\t0\t|\t0\t|\t\t|
+    #[test]
+    fn test_ncbi_importer() {
+        let nodes = "1\t|\t1\t|\tno rank\t|\t\t|\t8\t|\t0\t|\t1\t|\t0\t|\t0\t|\t0\t|\t0\t|\t0\t|\t\t|
 2\t|\t131567\t|\tsuperkingdom\t|\t\t|\t0\t|\t0\t|\t11\t|\t0\t|\t0\t|\t0\t|\t0\t|\t0\t|\t\t|
 543\t|\t91347\t|\tfamily\t|\t\t|\t0\t|\t1\t|\t11\t|\t1\t|\t0\t|\t1\t|\t0\t|\t0\t|\t\t|
 561\t|\t543\t|\tgenus\t|\t\t|\t0\t|\t1\t|\t11\t|\t1\t|\t0\t|\t1\t|\t0\t|\t0\t|\t\t|
@@ -127,7 +132,8 @@ fn test_ncbi_importer() {
 1236\t|\t1224\t|\tclass\t|\t\t|\t0\t|\t1\t|\t11\t|\t1\t|\t0\t|\t1\t|\t0\t|\t0\t|\t\t|
 91347\t|\t1236\t|\torder\t|\t\t|\t0\t|\t1\t|\t11\t|\t1\t|\t0\t|\t1\t|\t0\t|\t0\t|\t\t|
 131567\t|\t1\t|\tno rank\t|\t\t|\t8\t|\t1\t|\t1\t|\t1\t|\t0\t|\t1\t|\t1\t|\t0\t|\t\t|";
-    let names = "1\t|\tall\t|\t\t|\tsynonym\t|
+
+        let names = "1\t|\tall\t|\t\t|\tsynonym\t|
 1\t|\troot\t|\t\t|\tscientific name\t|
 2\t|\tBacteria\t|\tBacteria <prokaryotes>\t|\tscientific name\t|
 543\t|\tEnterobacteriaceae\t|\t\t|\tscientific name\t|
@@ -177,9 +183,10 @@ fn test_ncbi_importer() {
 91347\t|\tEnterobacterales\t|\t\t|\tscientific name\t|
 131567\t|\tbiota\t|\t\t|\tsynonym\t|
 131567\t|\tcellular organisms\t|\t\t|\tscientific name\t|";
-    let tax = load_ncbi(Cursor::new(nodes), Cursor::new(names)).unwrap();
-    assert_eq!(tax.name("562").unwrap(), "Escherichia coli");
-    assert_eq!(tax.rank("562").unwrap(), Some(TaxRank::Species));
-    assert_eq!(tax.parent("562").unwrap(), Some(("561", 1.)));
-    assert_eq!(tax.children("561").unwrap(), vec!["562"]);
+        let tax = load_ncbi(Cursor::new(nodes), Cursor::new(names)).unwrap();
+        assert_eq!(tax.name("562").unwrap(), "Escherichia coli");
+        assert_eq!(tax.rank("562").unwrap(), Some(TaxRank::Species));
+        assert_eq!(tax.parent("562").unwrap(), Some(Parent::new("561", 1.)));
+        assert_eq!(tax.children("561").unwrap(), vec!["562"]);
+    }
 }

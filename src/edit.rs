@@ -64,9 +64,9 @@ pub fn prune_to(
 ) -> Result<GeneralTaxonomy> {
     let mut good_ids: HashSet<IntTaxID> = tax_ids.iter().cloned().collect();
     for (node, pre) in tax.traverse(tax.root())? {
-        if let Some((parent_node, _)) = tax.parent(node)? {
+        if let Some(ref parent) = tax.parent(node)? {
             // insert child nodes on the traverse down (add node if parent is in)
-            if pre && include_children && good_ids.contains(&parent_node) {
+            if pre && include_children && good_ids.contains(&parent.tax_id) {
                 good_ids.insert(node);
             }
 
@@ -74,7 +74,7 @@ pub fn prune_to(
             // (note this will add some duplicates of the "children" nodes
             // but since this is a set that still works)
             if !pre && good_ids.contains(&node) {
-                good_ids.insert(parent_node);
+                good_ids.insert(parent.tax_id);
             }
         }
     }

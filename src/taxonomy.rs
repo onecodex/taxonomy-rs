@@ -7,6 +7,26 @@ use std::iter::Sum;
 use crate::rank::TaxRank;
 use crate::Result;
 
+#[derive(Debug, PartialEq)]
+pub struct Parent<T, D>
+where
+    T: Clone + Debug + Display + PartialEq,
+    D: Debug + PartialOrd + PartialEq + Sum,
+{
+    pub tax_id: T,
+    pub distance: D,
+}
+
+impl<T, D> Parent<T, D>
+where
+    T: Clone + Debug + Display + PartialEq,
+    D: Debug + PartialOrd + PartialEq + Sum,
+{
+    pub fn new(tax_id: T, distance: D) -> Self {
+        Self { tax_id, distance }
+    }
+}
+
 /// Taxonomy is a trait exposing a number of traversal and informational
 /// methods given a smaller number of required methods. This allows
 /// different taxonomic data structures with different memory/speed
@@ -25,7 +45,7 @@ where
 
     /// Returns the parent of the given taxonomic node and the distance to said parent.
     /// The parent of root should always be [None].
-    fn parent(&'t self, tax_id: T) -> Result<Option<(T, D)>>; // None if root or not in taxonomy
+    fn parent(&'t self, tax_id: T) -> Result<Option<Parent<T, D>>>; // None if root or not in taxonomy
 
     /// Returns the name of the tax_id provided.
     ///
@@ -49,19 +69,19 @@ where
         let mut last_parent = tax_id.clone();
         parents.push(tax_id);
         while let Some(p) = self.parent(last_parent)? {
-            last_parent = p.0.clone();
-            parents.push(p.0);
+            last_parent = p.tax_id.clone();
+            parents.push(p.tax_id);
         }
         Ok(parents)
     }
 
     /// Returns the parent at a given taxonomic rank (note this may not be
     /// the immediate parent). This also returns the distance *to* that parent.
-    fn parent_at_rank(&'t self, tax_id: T, rank: TaxRank) -> Result<Option<(T, D)>> {
+    fn parent_at_rank(&'t self, tax_id: T, rank: TaxRank) -> Result<Option<Parent<T, D>>> {
         // if this node is at the rank, just return it
         if let Some(cur_rank) = self.rank(tax_id.clone())? {
             if cur_rank == rank {
-                return Ok(Some((tax_id, vec![].into_iter().sum())));
+                return Ok(Some(Parent::new(tax_id, vec![].into_iter().sum())));
             }
         }
 
@@ -69,13 +89,13 @@ where
         let mut cur_id = tax_id.clone();
         let mut dists = Vec::new();
         while let Some(p) = self.parent(cur_id)? {
-            dists.push(p.1);
-            if let Some(cur_rank) = self.rank(p.0.clone())? {
+            dists.push(p.distance);
+            if let Some(cur_rank) = self.rank(p.tax_id.clone())? {
                 if cur_rank == rank {
-                    return Ok(Some((p.0, dists.into_iter().sum())));
+                    return Ok(Some(Parent::new(p.tax_id, dists.into_iter().sum())));
                 }
             }
-            cur_id = p.0.clone();
+            cur_id = p.tax_id.clone();
         }
         Ok(None)
     }
@@ -93,14 +113,14 @@ where
         let mut id1_parents: VecDeque<T> = VecDeque::new();
         id1_parents.push_front(id1);
         while let Some(p) = self.parent(id1_parents.front().unwrap().clone())? {
-            id1_parents.push_front(p.0);
+            id1_parents.push_front(p.tax_id);
         }
 
         // make a vec of parents of id2
         let mut id2_parents: VecDeque<T> = VecDeque::new();
         id2_parents.push_front(id2);
         while let Some(p) = self.parent(id2_parents.front().unwrap().clone())? {
-            id2_parents.push_front(p.0);
+            id2_parents.push_front(p.tax_id);
         }
 
         // find the last common ancestor (None if they don't have one)
@@ -198,7 +218,7 @@ pub(crate) mod test {
     use std::collections::HashSet;
 
     use crate::rank::TaxRank;
-    use crate::taxonomy::Taxonomy;
+    use crate::taxonomy::{Taxonomy, Parent};
     use crate::Result;
 
     pub(crate) struct MockTax;
@@ -226,21 +246,21 @@ pub(crate) mod test {
             })
         }
 
-        fn parent(&self, tax_id: u32) -> Result<Option<(u32, u16)>> {
+        fn parent(&self, tax_id: u32) -> Result<Option<Parent<u32, u16>>> {
             Ok(match tax_id {
-                131567 => Some((1, 1)),
-                2 => Some((131567, 1)),
-                1224 => Some((2, 1)),
-                1236 => Some((1224, 1)), // Gammaproteobacteria
-                135622 => Some((1236, 1)),
-                22 => Some((135622, 1)),
-                62322 => Some((22, 1)),
-                56812 => Some((62322, 1)), // Shewanella frigidimarina
-                135613 => Some((1236, 1)),
-                1046 => Some((135613, 1)),
-                53452 => Some((1046, 1)),
-                61598 => Some((53452, 1)),  // Lamprocystis purpurea
-                765909 => Some((61598, 1)), // Lamprocystis purpurea
+                131567 => Some(Parent::new(1, 1)),
+                2 => Some(Parent::new(131567, 1)),
+                1224 => Some(Parent::new(2, 1)),
+                1236 => Some(Parent::new(1224, 1)), // Gammaproteobacteria
+                135622 => Some(Parent::new(1236, 1)),
+                22 => Some(Parent::new(135622, 1)),
+                62322 => Some(Parent::new(22, 1)),
+                56812 => Some(Parent::new(62322, 1)), // Shewanella frigidimarina
+                135613 => Some(Parent::new(1236, 1)),
+                1046 => Some(Parent::new(135613, 1)),
+                53452 => Some(Parent::new(1046, 1)),
+                61598 => Some(Parent::new(53452, 1)),  // Lamprocystis purpurea
+                765909 => Some(Parent::new(61598, 1)), // Lamprocystis purpurea
                 _ => None,
             })
         }
@@ -294,11 +314,11 @@ pub(crate) mod test {
 
         assert_eq!(
             tax.parent_at_rank(765909, TaxRank::Genus).unwrap(),
-            Some((53452, 2))
+            Some(Parent::new(53452, 2))
         );
         assert_eq!(
             tax.parent_at_rank(765909, TaxRank::Class).unwrap(),
-            Some((1236, 5))
+            Some(Parent::new(1236, 5))
         );
     }
 

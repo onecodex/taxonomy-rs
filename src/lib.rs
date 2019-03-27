@@ -33,4 +33,4 @@ mod taxonomy;
 
 pub use crate::base::GeneralTaxonomy;
 pub use crate::rank::TaxRank;
-pub use crate::taxonomy::Taxonomy;
+pub use crate::taxonomy::{Taxonomy, Parent};

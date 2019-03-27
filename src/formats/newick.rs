@@ -65,10 +65,10 @@ where
         } else {
             out_buf.push_back(NewickToken::End);
             let mut name: String = format!("{}", node);
-            if let Some((_, dist)) = tax.parent(node)? {
-                if dist > zero {
+            if let Some(ref p) = tax.parent(node)? {
+                if p.distance > zero {
                     name.push(':');
-                    name.push_str(&format!("{}", dist));
+                    name.push_str(&format!("{}", p.distance));
                 }
             }
             out_buf.push_back(NewickToken::NameDist(name));
