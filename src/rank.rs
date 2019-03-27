@@ -11,7 +11,7 @@ use crate::{Result, TaxonomyError};
 /// by forcing all taxonomic ranks to fall within the below categories
 /// (this includes all current NCBI ranks and a few others, mostly ones
 /// specific to zoology and botany).
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum TaxRank {
     Domain,
     Subdomain,
@@ -96,7 +96,7 @@ pub enum TaxRank {
 impl TaxRank {
     /// Coverts a TaxRank into a one of the rank strings NCBI uses.
     /// Note that this doesn't handle ranks that are not used by the NCBI taxonomy.
-    pub fn to_ncbi_rank(&self) -> &'static str {
+    pub fn to_ncbi_rank(self) -> &'static str {
         match self {
             TaxRank::Superkingdom => "superkingdom",
             TaxRank::Kingdom => "kingdom",

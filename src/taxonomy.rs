@@ -11,6 +11,7 @@ use crate::Result;
 /// methods given a smaller number of required methods. This allows
 /// different taxonomic data structures with different memory/speed
 /// requirements to have a common set of methods.
+/// `T` is the type for the taxonomy ID and `D` for the distance
 pub trait Taxonomy<'t, T: 't, D: 't>
 where
     T: Clone + Debug + Display + PartialEq,

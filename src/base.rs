@@ -194,7 +194,7 @@ impl<'s> Taxonomy<'s, IntTaxID, f32> for GeneralTaxonomy {
             }
             .into());
         }
-        Ok(AsRef::as_ref(&self.names[tax_id]))
+        Ok(&self.names[tax_id])
     }
 
     fn rank(&self, tax_id: usize) -> Result<Option<TaxRank>> {
@@ -204,7 +204,7 @@ impl<'s> Taxonomy<'s, IntTaxID, f32> for GeneralTaxonomy {
             }
             .into());
         }
-        Ok(self.ranks[tax_id].clone())
+        Ok(self.ranks[tax_id])
     }
 }
 
@@ -259,6 +259,6 @@ impl<'s> Taxonomy<'s, &'s str, f32> for GeneralTaxonomy {
 
     fn rank(&self, tax_id: &str) -> Result<Option<TaxRank>> {
         let tax_id = self.to_internal_id(&tax_id)?;
-        Ok(self.ranks[tax_id].clone())
+        Ok(self.ranks[tax_id])
     }
 }

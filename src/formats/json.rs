@@ -255,7 +255,7 @@ where
     let name = tax.name(tax_id.clone())?;
     let rank = tax.rank(tax_id.clone())?;
     let tax_json = json!({
-        "id": format!("{}", tax_id.clone()),
+        "id": format!("{}", tax_id),
         "name": name,
         "rank": rank.map_or("", |x| x.to_ncbi_rank()),
         "children": children,
