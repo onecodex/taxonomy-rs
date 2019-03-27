@@ -22,6 +22,10 @@ use crate::taxonomy::Taxonomy as TaxTrait;
 
 py_exception!(taxonomy, TaxonomyError, pyo3::exceptions::Exception);
 
+/// The Taxonomy object provides the primary interface for exploring a
+/// biological taxonomy. Iterating over the Taxonomy returns all the taxonomy
+/// ids in pre-order fashion and indexing into the Taxonomy object with a
+/// taxonomy id will return a tuple of the name and rank of that id.
 #[pyclass]
 pub struct Taxonomy {
     t: GeneralTaxonomy,
@@ -31,6 +35,9 @@ pub struct Taxonomy {
 
 #[pymethods]
 impl Taxonomy {
+    /// from_json(cls, value)
+    /// --
+    ///
     /// Load a Taxonomy from a JSON-encoded string. The format can either be
     /// of the tree or node_link_data types.
     #[classmethod]
@@ -45,6 +52,9 @@ impl Taxonomy {
         })
     }
 
+    /// from_newick(cls, value)
+    /// --
+    ///
     /// Load a Taxonomy from a Newick-encoded string.
     ///
     /// Experimental.
@@ -60,6 +70,9 @@ impl Taxonomy {
         })
     }
 
+    /// from_ncbi(cls, nodes_path, names_path)
+    /// --
+    ///
     /// Load a Taxonomy from a pair of NCBI dump files (nodes.dmp and names.dmp).
     #[classmethod]
     fn from_ncbi(_cls: &PyType, nodes_path: &str, names_path: &str) -> PyResult<Taxonomy> {
@@ -74,6 +87,9 @@ impl Taxonomy {
         })
     }
 
+    /// from_phyloxml(cls, value)
+    /// --
+    ///
     /// Load a Taxonomy from a PhyloXML-encoded string.
     ///
     /// Experimental.
@@ -89,7 +105,10 @@ impl Taxonomy {
         })
     }
 
-    /// Export a Taxonomy as a JSON-encoded string. By default, the JSON format
+    /// to_json(self, /, as_node_link)
+    /// --
+    ///
+    /// Export a Taxonomy as a JSON-encoded byte string. By default, the JSON format
     /// is a tree format unless the `as_node_link` parameter is set to True.
     #[args(as_node_link = false)]
     fn to_json(&self, as_node_link: bool) -> PyResult<Py<PyBytes>> {
@@ -102,7 +121,10 @@ impl Taxonomy {
         Ok(PyBytes::new(py, &s))
     }
 
-    /// Export a Taxonomy as a Newick-encoded string.
+    /// to_newick(self)
+    /// --
+    ///
+    /// Export a Taxonomy as a Newick-encoded byte string.
     ///
     /// Experimental.
     fn to_newick(&self) -> PyResult<Py<PyBytes>> {
@@ -115,6 +137,9 @@ impl Taxonomy {
         Ok(PyBytes::new(py, &s))
     }
 
+    /// parent(self, id, /, at_rank, include_dist)
+    /// --
+    ///
     /// Return the immediate parent taxonomy node of the node id provided.
     ///
     /// If `at_rank` is provided, scan all the nodes in the node's lineage and return
@@ -168,6 +193,9 @@ impl Taxonomy {
         }
     }
 
+    /// children(self, id)
+    /// --
+    ///
     /// Return a list of child taxonomy nodes from the node id provided.
     fn children(&self, id: &str) -> PyResult<Vec<String>> {
         self.t
@@ -176,6 +204,9 @@ impl Taxonomy {
             .map_err(|e| PyErr::new::<TaxonomyError, _>(format!("{}", e)))
     }
 
+    /// lineage(self, id)
+    /// --
+    ///
     /// Return a list of all the parent taxonomy nodes of the node id provided
     /// (including that node itself).
     fn lineage(&self, id: &str) -> PyResult<Vec<String>> {
@@ -185,6 +216,9 @@ impl Taxonomy {
             .map_err(|e| PyErr::new::<TaxonomyError, _>(format!("{}", e)))
     }
 
+    /// name(self, id)
+    /// --
+    ///
     /// Return the name of the node id provided.
     fn name(&self, id: &str) -> PyResult<String> {
         let name = self
@@ -194,6 +228,9 @@ impl Taxonomy {
         Ok(name.to_string())
     }
 
+    /// rank(self, id)
+    /// --
+    ///
     /// Return the taxonomic rank of the node id provided.
     fn rank(&self, id: &str) -> PyResult<String> {
         let rank = self
@@ -206,6 +243,9 @@ impl Taxonomy {
             .to_string())
     }
 
+    /// prune(self, keep, remove)
+    /// --
+    ///
     /// Return a copy of the taxonomy containing:
     ///  - only the nodes in `keep` and their parents if provided
     ///  - all of the nodes except those in remove and their children if provided

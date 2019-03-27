@@ -113,6 +113,7 @@ where
     let mut buffer: Vec<u8> = Vec::new();
     reader.read_to_end(&mut buffer)?;
 
+    // make the root node explicitly first
     let mut tax_ids: Vec<String> = vec!["".to_string()];
     let mut parent_ids: Vec<usize> = vec![0];
     let mut dists: Vec<f32> = vec![1.];
@@ -122,19 +123,21 @@ where
     while cur_pos < buffer.len() {
         match buffer[cur_pos] {
             b'(' => {
-                // set the parent to be the current node when descending
-                cur_lineage.push(tax_ids.len() - 1);
                 // make a new node
                 tax_ids.push("".to_string());
                 parent_ids.push(*cur_lineage.last().unwrap_or(&0));
-                dists.push(0.);
+                dists.push(1.);
+                cur_lineage.push(tax_ids.len() - 1);
                 cur_pos += 1;
             }
             b',' => {
-                // just make a new node
+                // finish up with the current node
+                cur_lineage.pop();
+                // make a new node
                 tax_ids.push("".to_string());
                 parent_ids.push(*cur_lineage.last().unwrap_or(&0));
                 dists.push(1.);
+                cur_lineage.push(tax_ids.len() - 1);
                 cur_pos += 1;
             }
             b')' => {
@@ -145,7 +148,7 @@ where
             _ => {
                 // set the name and dist on the cur_node
                 let cur_node = *cur_lineage.last().unwrap_or(&0);
-                let pos = memchr2(b',', b')', &buffer[cur_pos..]).unwrap_or_else(|| buffer.len());
+                let pos = memchr2(b',', b')', &buffer[cur_pos..]).map(|x| x + cur_pos).unwrap_or_else(|| buffer.len());
                 let name_dist = &buffer[cur_pos..pos];
                 let mut chunk_iter = name_dist.splitn(2, |x| x == &b':');
                 tax_ids[cur_node] = str::from_utf8(chunk_iter.next().unwrap_or(b""))?.to_string();
@@ -175,8 +178,16 @@ fn test_write_newick() {
 
 #[test]
 fn test_load_newick() {
-    // FIXME: more testing
-    let newick_str = b"(())";
+    use crate::taxonomy::Taxonomy;
 
+    let newick_str = b"(())";
     let tax = load_newick(&mut newick_str.as_ref());
+
+    let newick_str = b"(A,B,(C,D));";
+    let tax = load_newick(&mut newick_str.as_ref());
+
+    let newick_str = b"(A:0.1,B:0.2,(C:0.3,D:0.4)E:0.5)F;";
+    let tax = load_newick(&mut newick_str.as_ref()).unwrap();
+    assert_eq!(tax.parent("D").unwrap(), Some(("E", 0.4)));
+    assert_eq!(tax.parent("E").unwrap(), Some(("F", 0.5)));
 }

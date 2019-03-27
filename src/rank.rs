@@ -91,6 +91,10 @@ pub enum TaxRank {
     // place in the ordering (like a NaN) so we should manually derive out a
     // PartialOrd impl for TaxRank
     Unspecified,
+    // there may be additional ranks added in the future so we don't want
+    // downstream users to count on exhaustively matching this list
+    #[doc(hidden)]
+    __Nonexhaustive,
 }
 
 impl TaxRank {
