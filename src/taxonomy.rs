@@ -133,7 +133,7 @@ where
     {
         self.traverse(self.root()).unwrap().count() / 2
     }
-    
+
     /// Convenience function for determining if there are any nodes at all
     /// in the taxonomy. This should almost always be implemented for performance
     /// reasons.
@@ -145,9 +145,56 @@ where
     }
 }
 
+pub struct TaxonomyIterator<'t, T: 't, D: 't> {
+    nodes_left: Vec<T>,
+    visited_nodes: Vec<T>,
+    tax: &'t Taxonomy<'t, T, D>,
+}
+
+impl<'t, T, D> TaxonomyIterator<'t, T, D> {
+    pub fn new(tax: &'t Taxonomy<'t, T, D>, root_node: T) -> Self {
+        TaxonomyIterator {
+            nodes_left: vec![root_node],
+            visited_nodes: vec![],
+            tax,
+        }
+    }
+}
+
+impl<'t, T, D> Iterator for TaxonomyIterator<'t, T, D>
+where
+    T: Clone + Debug + Display + PartialEq,
+    D: Debug + PartialOrd + PartialEq + Sum,
+{
+    type Item = (T, bool);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.nodes_left.is_empty() {
+            return None;
+        }
+
+        let cur_node = self.nodes_left.last().unwrap().clone();
+        let node_visited = {
+            let last_visited = self.visited_nodes.last();
+            Some(&cur_node) == last_visited
+        };
+        if node_visited {
+            self.visited_nodes.pop();
+            Some((self.nodes_left.pop().unwrap(), false))
+        } else {
+            self.visited_nodes.push(cur_node.clone());
+            let children = self.tax.children(cur_node.clone()).unwrap();
+            if !children.is_empty() {
+                self.nodes_left.extend(children);
+            }
+            Some((cur_node, true))
+        }
+    }
+}
+
 #[cfg(test)]
 pub(crate) mod test {
-    use std::collections::{HashMap, HashSet};
+    use std::collections::HashSet;
 
     use crate::rank::TaxRank;
     use crate::taxonomy::Taxonomy;
@@ -213,7 +260,7 @@ pub(crate) mod test {
             })
         }
 
-        fn rank(&self, tax_id: u32) -> Result<TaxRank> {
+        fn rank(&self, tax_id: u32) -> Result<Option<TaxRank>> {
             Ok(match tax_id {
                 2 => Some(TaxRank::Superkingdom),
                 1224 => Some(TaxRank::Phylum),
@@ -282,52 +329,5 @@ pub(crate) mod test {
             .count();
 
         assert_eq!(n_nodes, 28, "Each node appears twice");
-    }
-}
-
-pub struct TaxonomyIterator<'t, T: 't, D: 't> {
-    nodes_left: Vec<T>,
-    visited_nodes: Vec<T>,
-    tax: &'t Taxonomy<'t, T, D>,
-}
-
-impl<'t, T, D> TaxonomyIterator<'t, T, D> {
-    pub fn new(tax: &'t Taxonomy<'t, T, D>, root_node: T) -> Self {
-        TaxonomyIterator {
-            nodes_left: vec![root_node],
-            visited_nodes: vec![],
-            tax,
-        }
-    }
-}
-
-impl<'t, T, D> Iterator for TaxonomyIterator<'t, T, D>
-where
-    T: Clone + Debug + Display + PartialEq,
-    D: Debug + PartialOrd + PartialEq + Sum,
-{
-    type Item = (T, bool);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.nodes_left.is_empty() {
-            return None;
-        }
-
-        let cur_node = self.nodes_left.last().unwrap().clone();
-        let node_visited = {
-            let last_visited = self.visited_nodes.last();
-            Some(&cur_node) == last_visited
-        };
-        if node_visited {
-            self.visited_nodes.pop();
-            Some((self.nodes_left.pop().unwrap(), false))
-        } else {
-            self.visited_nodes.push(cur_node.clone());
-            let children = self.tax.children(cur_node.clone()).unwrap();
-            if !children.is_empty() {
-                self.nodes_left.extend(children);
-            }
-            Some((cur_node, true))
-        }
     }
 }

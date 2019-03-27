@@ -91,7 +91,7 @@ impl Taxonomy {
 
     /// Export a Taxonomy as a JSON-encoded string. By default, the JSON format
     /// is a tree format unless the `as_node_link` parameter is set to True.
-    #[args(as_node_link=false)]
+    #[args(as_node_link = false)]
     fn to_json(&self, as_node_link: bool) -> PyResult<Py<PyBytes>> {
         let mut s = Vec::new();
         save_json::<&str, _, _, _>(&self.t, &mut s, None, as_node_link)
@@ -122,8 +122,13 @@ impl Taxonomy {
     ///
     /// If `include_dist` is provided, return the distance from the node id provided
     /// to the parent returned.
-    #[args(include_dist=false)]
-    fn parent(&self, id: &str, at_rank: Option<&str>, include_dist: bool) -> PyResult<Option<PyObject>> {
+    #[args(include_dist = false)]
+    fn parent(
+        &self,
+        id: &str,
+        at_rank: Option<&str>,
+        include_dist: bool,
+    ) -> PyResult<Option<PyObject>> {
         let gil = Python::acquire_gil();
         let py = gil.python();
 
@@ -131,13 +136,15 @@ impl Taxonomy {
             if let Some(rank) = TaxRank::from_str(rank).ok() {
                 self.t
                     .parent_at_rank(id, rank)
-                    .map(|o| o.map(|(i, d)| {
-                        if include_dist {
-                            (i.to_string(), d).into_object(py)
-                        } else {
-                            i.to_string().into_object(py)
-                        }
-                    }))
+                    .map(|o| {
+                        o.map(|(i, d)| {
+                            if include_dist {
+                                (i.to_string(), d).into_object(py)
+                            } else {
+                                i.to_string().into_object(py)
+                            }
+                        })
+                    })
                     .map_err(|e| PyErr::new::<TaxonomyError, _>(format!("{}", e)))
             } else {
                 Err(PyErr::new::<TaxonomyError, _>(format!(
@@ -148,13 +155,15 @@ impl Taxonomy {
         } else {
             self.t
                 .parent(id)
-                .map(|o| o.map(|(i, d)| {
-                    if include_dist {
-                        (i.to_string(), d).into_object(py)
-                    } else {
-                        i.to_string().into_object(py)
-                    }
-                }))
+                .map(|o| {
+                    o.map(|(i, d)| {
+                        if include_dist {
+                            (i.to_string(), d).into_object(py)
+                        } else {
+                            i.to_string().into_object(py)
+                        }
+                    })
+                })
                 .map_err(|e| PyErr::new::<TaxonomyError, _>(format!("{}", e)))
         }
     }

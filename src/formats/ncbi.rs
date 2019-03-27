@@ -178,8 +178,8 @@ fn test_ncbi_importer() {
 131567\t|\tbiota\t|\t\t|\tsynonym\t|
 131567\t|\tcellular organisms\t|\t\t|\tscientific name\t|";
     let tax = load_ncbi(Cursor::new(nodes), Cursor::new(names)).unwrap();
-    assert_eq!(tax.info("562").unwrap().0, Some("Escherichia coli"));
-    assert_eq!(tax.info("562").unwrap().1, Some(TaxRank::Species));
+    assert_eq!(tax.name("562").unwrap(), "Escherichia coli");
+    assert_eq!(tax.rank("562").unwrap(), Some(TaxRank::Species));
     assert_eq!(tax.parent("562").unwrap(), Some(("561", 1.)));
     assert_eq!(tax.children("561").unwrap(), vec!["562"]);
 }
