@@ -1,6 +1,7 @@
 //! Implementation of the Python API.
 //!
-//! Only enabled when `cargo build --features python` is run.
+//! Only enabled when `cargo build --features python` is run or when the
+//! Python API is build with `python setup.py develop`.
 use std::fs::File;
 use std::io::Cursor;
 use std::str::FromStr;

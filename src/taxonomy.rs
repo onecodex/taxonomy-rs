@@ -24,14 +24,14 @@ where
     fn children(&'t self, tax_id: T) -> Result<Vec<T>>;
 
     /// Returns the parent of the given taxonomic node and the distance to said parent.
-    /// The parent of root should always be [None].
+    /// The parent of the root node should always be [None].
     fn parent(&'t self, tax_id: T) -> Result<Option<(T, D)>>; // None if root or not in taxonomy
 
     /// Returns the name of the tax_id provided.
     ///
-    /// Although not strictly required for many of the operations we implement
-    /// here, this is primarily here to allow taxonomic exports to conveniently
-    /// have access to names in a standardized fashion.
+    /// Although not strictly required for many taxonomic operations,
+    /// this method allows taxonomic exports to conveniently have access
+    /// to names in a standardized fashion.
     fn name(&self, tax_id: T) -> Result<&str>;
 
     /// Returns the taxonomic rank of the tax_id provided.

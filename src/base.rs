@@ -51,6 +51,8 @@ impl GeneralTaxonomy {
     }
 
     /// Initializer for a new Taxonomy.
+    ///
+    /// All `Vec`s must be the same length or initialization will fail.
     pub fn new(
         tax_ids: Vec<String>,
         parent_ids: Vec<usize>,
@@ -96,6 +98,9 @@ impl GeneralTaxonomy {
 
     /// Given an internal tax_id (an array position) return the
     /// corresponding external tax_id (e.g. a NCBI taxonomy ID).
+    ///
+    /// Because the `Taxonomy` train is implemented for internal IDs also,
+    /// the can be used to speed up some operations by avoiding a string lookup.
     #[allow(clippy::wrong_self_convention)]
     #[inline]
     pub fn from_internal_id(&self, tax_id: IntTaxID) -> Result<&str> {
@@ -106,6 +111,9 @@ impl GeneralTaxonomy {
     /// Given an external tax_id (e.g. a NCBI taxonomy ID) return the
     /// corresponding internal tax_id (the position of that tax node in the
     /// internal array).
+    ///
+    /// Because the `Taxonomy` train is implemented for internal IDs also,
+    /// the can be used to speed up some operations by avoiding a string lookup.
     #[inline]
     pub fn to_internal_id(&self, tax_id: &str) -> Result<IntTaxID> {
         match self.tax_id_lookup {

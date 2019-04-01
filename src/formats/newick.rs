@@ -150,9 +150,9 @@ where
                 let cur_node = *cur_lineage.last().unwrap_or(&0);
                 let pos = memchr2(b',', b')', &buffer[cur_pos..]).map(|x| x + cur_pos).unwrap_or_else(|| buffer.len());
                 let name_dist = &buffer[cur_pos..pos];
-                let mut chunk_iter = name_dist.splitn(2, |x| x == &b':');
-                tax_ids[cur_node] = str::from_utf8(chunk_iter.next().unwrap_or(b""))?.to_string();
-                dists[cur_node] = str::from_utf8(chunk_iter.next().unwrap_or(b"1"))?.parse()?;
+                let mut chunk_iter = str::from_utf8(name_dist)?.trim_end_matches(";").splitn(2, |x| x == ':');
+                tax_ids[cur_node] = chunk_iter.next().unwrap_or("").to_string();
+                dists[cur_node] = chunk_iter.next().unwrap_or("1").parse()?;
                 cur_pos = pos;
             }
         }
