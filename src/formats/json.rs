@@ -138,11 +138,13 @@ pub fn load_tree_json(tax_json: &Value) -> Result<GeneralTaxonomy> {
         ranks.push(TaxRank::from_str(rank).ok());
 
         let loc = tax_ids.len() - 1;
-        for child in node["children"]
-            .as_array()
-            .ok_or_else(|| format_err!("Children for {} is not an array", tax_id))?
-        {
-            add_node(loc, child, tax_ids, parent_ids, names, ranks)?;
+        if let Some(children) = node.get("children") {
+            for child in children
+                .as_array()
+                .ok_or_else(|| format_err!("Children for {} is not an array", tax_id))?
+            {
+                add_node(loc, child, tax_ids, parent_ids, names, ranks)?;
+            }
         }
         Ok(())
     }
