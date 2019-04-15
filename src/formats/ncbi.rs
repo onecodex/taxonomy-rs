@@ -44,7 +44,8 @@ where
 
     for (ix, line) in nodes_buf.lines().enumerate() {
         let mut fields: Vec<String> = line?.split("\t|\t").map(|x| x.to_string()).collect();
-        if fields.len() < 10 {  // should be at least 14
+        if fields.len() < 10 {
+            // should be at least 14
             let msg = if ix == 0 {
                 "Not enough fields; perhaps names and nodes files are switched?"
             } else {
@@ -54,7 +55,8 @@ where
                 file: "nodes.dmp".to_string(),
                 line: ix,
                 msg: msg.to_string(),
-            }.into());
+            }
+            .into());
         }
         let tax_id = fields.remove(0).to_string();
         let parent_tax_id = fields.remove(0);
@@ -70,13 +72,20 @@ where
     }
 
     // TODO: fixme? this fails if we have unmapped parent nodes (i.e. file is truncated?)
-    let parent_ids: Result<Vec<usize>> = parents.iter().enumerate().map(|(ix, x)| {
-        tax_to_idx.get(&*x.as_str()).map(|x| *x).ok_or_else(|| TaxonomyError::ImportError {
-            file: "nodes.dmp".to_string(),
-            line: ix + 1,
-            msg: format!("Parent ID {} could not be found", x)
-        }.into())
-    }).collect();
+    let parent_ids: Result<Vec<usize>> = parents
+        .iter()
+        .enumerate()
+        .map(|(ix, x)| {
+            tax_to_idx.get(&*x.as_str()).map(|x| *x).ok_or_else(|| {
+                TaxonomyError::ImportError {
+                    file: "nodes.dmp".to_string(),
+                    line: ix + 1,
+                    msg: format!("Parent ID {} could not be found", x),
+                }
+                .into()
+            })
+        })
+        .collect();
 
     let parent_ids = parent_ids?;
 
@@ -84,12 +93,14 @@ where
     let mut names: Vec<String> = vec!["".to_string(); tax_ids.len()];
     for (ix, line) in names_buf.lines().enumerate() {
         let mut fields: Vec<String> = line?.split("\t|\t").map(|x| x.to_string()).collect();
-        if fields.len() > 10 {  // should only be 5
+        if fields.len() > 10 {
+            // should only be 5
             return Err(TaxonomyError::ImportError {
                 file: "names.dmp".to_string(),
                 line: ix,
                 msg: "Too many fields?".to_string(),
-            }.into());
+            }
+            .into());
         }
         let tax_id = fields.remove(0);
         let name = fields.remove(0);

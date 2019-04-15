@@ -88,7 +88,7 @@ where
     ///
     /// The LCA (lowest common ancestor) of nodes D and E is node B and the
     /// LCA of nodes D and C is node C itself.
-    fn lca(&'t self, id1: T, id2: T) -> Result<Option<T>> {
+    fn lca(&'t self, id1: T, id2: T) -> Result<T> {
         // make a vec of parents of id1
         let mut id1_parents: VecDeque<T> = VecDeque::new();
         id1_parents.push_front(id1);
@@ -103,13 +103,13 @@ where
             id2_parents.push_front(p.0);
         }
 
-        // find the last common ancestor (None if they don't have one)
-        let mut common = None;
+        // find the lowest common ancestor
+        let mut common = self.root();
         for (pid1, pid2) in id1_parents.into_iter().zip(id2_parents.into_iter()) {
             if pid1 != pid2 {
                 break;
             }
-            common = Some(pid1);
+            common = pid1;
         }
         Ok(common)
     }

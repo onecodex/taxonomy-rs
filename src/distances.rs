@@ -94,7 +94,7 @@ where
             .into_iter()
             .try_fold(first_child, |ancestor, child| match ancestor {
                 None => Ok(None),
-                Some(a) => taxonomy.lca(a, child),
+                Some(a) => taxonomy.lca(a, child).map(|v| Some(v)),
             })?;
     Ok((ancestor, max_score))
     // is max_score going to be a little low here because we're not counting

@@ -22,7 +22,11 @@ pub enum TaxonomyError {
     UnrecognizedRank { rank: String },
     /// A string could not be parsed into a TaxRank.
     #[fail(display = "Error in file {} at line {}: {}", file, line, msg)]
-    ImportError { file: String, line: usize, msg: String },
+    ImportError {
+        file: String,
+        line: usize,
+        msg: String,
+    },
 }
 
 mod base;
