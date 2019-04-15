@@ -217,6 +217,17 @@ impl Taxonomy {
             .map_err(|e| PyErr::new::<TaxonomyError, _>(format!("{}", e)))
     }
 
+    /// lca(self, id1, id2)
+    /// --
+    ///
+    /// Return the lowest common ancestor of two taxonomy nodes.
+    fn lca(&self, id1: &str, id2: &str) -> PyResult<String> {
+        self.t
+            .lca(id1, id2)
+            .map(|i| i.to_string())
+            .map_err(|e| PyErr::new::<TaxonomyError, _>(format!("{}", e)))
+    }
+
     /// name(self, id)
     /// --
     ///

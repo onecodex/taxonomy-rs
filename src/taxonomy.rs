@@ -86,7 +86,7 @@ where
     /// # A -- B --
     /// #          \-- E
     ///
-    /// The LCA (last common ancestor) of nodes D and E is node B and the
+    /// The LCA (lowest common ancestor) of nodes D and E is node B and the
     /// LCA of nodes D and C is node C itself.
     fn lca(&'t self, id1: T, id2: T) -> Result<Option<T>> {
         // make a vec of parents of id1
