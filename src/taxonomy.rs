@@ -284,8 +284,8 @@ pub(crate) mod test {
     #[test]
     fn test_lca() {
         let tax = MockTax;
-        assert_eq!(tax.lca(56812, 22).unwrap(), Some(22));
-        assert_eq!(tax.lca(56812, 765909).unwrap(), Some(1236));
+        assert_eq!(tax.lca(56812, 22).unwrap(), 22);
+        assert_eq!(tax.lca(56812, 765909).unwrap(), 1236);
     }
 
     #[test]
