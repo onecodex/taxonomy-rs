@@ -1,5 +1,9 @@
 # Taxonomy
 
+[![PyPI version](https://badge.fury.io/py/taxonomy.svg)](https://pypi.org/project/taxonomy/)
+[![Crates version](https://img.shields.io/crates/v/taxonomy.svg)](https://crates.io/crates/taxonomy)
+[![CircleCI](https://circleci.com/gh/onecodex/taxonomy-rs.svg?style=shield)](https://circleci.com/gh/onecodex/taxonomy-rs)
+
 This is a Rust library for reading, writing, and editing biological taxonomies. There are associated Python bindings for accessing most of the functionality from Python.
 
 This library was developed initially as a component in One Codex's metagenomic classification pipeline before being refactored out, expanded, and open-sourced. It is designed such that it can be used *as is* with a number of taxonomic formats *or* the Taxonomy trait it provides can be used to add last common ancestor, traversal, etc. methods to a downstream package's taxonomy implementation.
