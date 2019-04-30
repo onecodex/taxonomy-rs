@@ -1,5 +1,7 @@
 # Taxonomy
 
+## Warning: This repository has been deprecated and its contents have been moved to https://github.com/onecodex/taxonomy ##
+
 [![PyPI version](https://badge.fury.io/py/taxonomy.svg)](https://pypi.org/project/taxonomy/)
 [![Crates version](https://img.shields.io/crates/v/taxonomy.svg)](https://crates.io/crates/taxonomy)
 [![CircleCI](https://circleci.com/gh/onecodex/taxonomy-rs.svg?style=shield)](https://circleci.com/gh/onecodex/taxonomy-rs)
